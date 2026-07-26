@@ -7,14 +7,35 @@ import { adminApi } from '@/lib/api';
 import { formatDate } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/Skeleton';
 
+interface Customer {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+  isActive: boolean;
+  createdAt: string;
+  _count?: { orders: number };
+}
+
+interface CustomersResponse {
+  customers: Customer[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
 export default function AdminCustomersPage() {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading } = useQuery<CustomersResponse>({
     queryKey: ['admin-customers', search, page],
     queryFn: () =>
-      adminApi.getCustomers({ search, page, limit: 20 }).then((r) => (r as { data: { data: unknown } }).data.data),
+      adminApi.getCustomers({ search, page, limit: 20 }).then((r) => r.data.data as CustomersResponse),
   });
 
   const customers = data?.customers || [];
