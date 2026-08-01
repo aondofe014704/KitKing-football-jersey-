@@ -35,14 +35,18 @@ function TimeUnit({ value, label }: { value: number; label: string }) {
 }
 
 export function FlashSale() {
-  const [target] = useState(() => {
-    const d = new Date();
-    d.setHours(d.getHours() + 8);
-    return d;
-  });
-  const [timeLeft, setTimeLeft] = useState(getTimeLeft(target));
+  const [target, setTarget] = useState<Date | null>(null);
+  const [timeLeft, setTimeLeft] = useState({ hours: 0, minutes: 0, seconds: 0 });
 
   useEffect(() => {
+    const d = new Date();
+    d.setHours(d.getHours() + 8);
+    setTarget(d);
+    setTimeLeft(getTimeLeft(d));
+  }, []);
+
+  useEffect(() => {
+    if (!target) return;
     const timer = setInterval(() => setTimeLeft(getTimeLeft(target)), 1000);
     return () => clearInterval(timer);
   }, [target]);

@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   DollarSign, ShoppingBag, Package, Users, TrendingUp, TrendingDown,
@@ -10,6 +11,14 @@ import Link from 'next/link';
 import { adminApi } from '@/lib/api';
 import { formatPrice, formatDate, getOrderStatusColor } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/Skeleton';
+
+function ClientDate() {
+  const [label, setLabel] = useState('');
+  useEffect(() => {
+    setLabel(new Date().toLocaleDateString('en-NG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }));
+  }, []);
+  return <>{label}</>;
+}
 
 function StatCard({ label, value, sub, icon: Icon, color, trend }: {
   label: string; value: string | number; sub?: string;
@@ -82,7 +91,7 @@ export default function AdminDashboard() {
         <div>
           <h1 className="text-2xl font-bold text-white">Dashboard</h1>
           <p className="text-white/40 text-sm mt-0.5">
-            {new Date().toLocaleDateString('en-NG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            <ClientDate />
           </p>
         </div>
         <Link href="/admin/orders" className="flex items-center gap-2 px-4 py-2 bg-brand-green text-white rounded-xl text-sm font-semibold hover:bg-brand-green-light transition-colors">

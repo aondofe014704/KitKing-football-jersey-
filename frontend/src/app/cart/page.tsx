@@ -11,16 +11,19 @@ import { Input } from '@/components/ui/Input';
 import { useCartStore } from '@/store/cart.store';
 import { couponsApi } from '@/lib/api';
 import { formatPrice, getPrimaryImage } from '@/lib/utils';
+import { useHydrated } from '@/hooks/useHydrated';
 import toast from 'react-hot-toast';
 
 export default function CartPage() {
+  const hydrated = useHydrated();
   const { items, removeItem, updateQuantity, clearCart, getTotal } = useCartStore();
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; value: number; type: string } | null>(null);
   const [applyingCoupon, setApplyingCoupon] = useState(false);
 
-  const subtotal = getTotal();
-  const shippingFee = subtotal >= 50000 ? 0 : 2500;
+  const subtotal = hydrated ? getTotal() : 0;
+  const safeItems = hydrated ? items : [];
+  const shippingFee = safeItems.length === 0 || subtotal >= 50000 ? 0 : 2500;
   const discount = appliedCoupon
     ? appliedCoupon.type === 'PERCENTAGE'
       ? (subtotal * appliedCoupon.value) / 100
@@ -49,7 +52,7 @@ export default function CartPage() {
     toast('Coupon removed');
   };
 
-  if (items.length === 0) {
+  if (!hydrated || safeItems.length === 0) {
     return (
       <MainLayout>
         <div className="min-h-[60vh] flex flex-col items-center justify-center px-4 text-center">
@@ -80,7 +83,7 @@ export default function CartPage() {
           </nav>
           <div className="flex items-center justify-between">
             <h1 className="text-3xl font-display text-brand-black">
-              Your Cart <span className="text-gray-400 text-xl font-body">({items.length} item{items.length !== 1 ? 's' : ''})</span>
+              Your Cart <span className="text-gray-400 text-xl font-body">({safeItems.length} item{safeItems.length !== 1 ? 's' : ''})</span>
             </h1>
             <button onClick={clearCart} className="text-sm text-red-400 hover:text-red-600 flex items-center gap-1">
               <Trash2 size={14} /> Clear Cart

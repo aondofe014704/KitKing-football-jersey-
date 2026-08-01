@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -20,13 +20,16 @@ interface ProductCardProps {
 export function ProductCard({ product, className }: ProductCardProps) {
   const [hovered, setHovered] = useState(false);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
   const { toggle, isInWishlist } = useWishlistStore();
   const { addItem } = useCartStore();
+
+  useEffect(() => setMounted(true), []);
 
   const primaryImage = getPrimaryImage(product.images);
   const secondaryImage = product.images.find((img) => !img.isPrimary)?.url;
   const discount = getDiscountPercentage(product.price, product.comparePrice);
-  const inWishlist = isInWishlist(product.id);
+  const inWishlist = mounted ? isInWishlist(product.id) : false;
   const inStock = product.variants.some((v) => v.stock > 0);
   const availableSizes = product.variants.filter((v) => v.stock > 0);
 

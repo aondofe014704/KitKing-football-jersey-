@@ -58,8 +58,13 @@ export function Navbar() {
   const { getItemCount } = useCartStore();
   const { productIds } = useWishlistStore();
 
-  const cartCount = getItemCount();
-  const wishlistCount = productIds.length;
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  const cartCount = mounted ? getItemCount() : 0;
+  const wishlistCount = mounted ? productIds.length : 0;
+  const authReady = mounted ? isAuthenticated : false;
+  const authUser = mounted ? user : null;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -218,13 +223,13 @@ export function Navbar() {
               </Link>
 
               {/* Account */}
-              {isAuthenticated ? (
+              {authReady ? (
                 <Link
-                  href={user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN' ? '/admin' : '/dashboard'}
+                  href={authUser?.role === 'ADMIN' || authUser?.role === 'SUPER_ADMIN' ? '/admin' : '/dashboard'}
                   className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-brand-green/10 text-brand-green text-sm font-medium hover:bg-brand-green hover:text-white transition-colors"
                 >
                   <User size={16} />
-                  <span>{user?.firstName}</span>
+                  <span>{authUser?.firstName}</span>
                 </Link>
               ) : (
                 <Link
@@ -299,7 +304,7 @@ export function Navbar() {
                   </div>
                 ))}
                 <div className="pt-3 border-t border-gray-100">
-                  {isAuthenticated ? (
+                  {authReady ? (
                     <Link
                       href="/dashboard"
                       className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-brand-green bg-brand-green/8"
